@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/concurrent/Unsafe" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/concurrent/多线程" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/concurrent/线程池" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/concurrent/CyclicBarrier" isTestSource="false" />
     </content>
   </component>
 </module>
