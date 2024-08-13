@@ -13,6 +13,7 @@
         <module>proxy</module>
         <module>reflect</module>
         <module>distributed</module>
+        <module>redisson</module>
     </modules>
 
     <properties>
