@@ -1,4 +1,4 @@
-package 创建线程池;
+package 线程池的使用;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
