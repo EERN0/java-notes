@@ -9,6 +9,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * 代理类
+ * <p>
  * jdk的代理类、目标类要实现共同的接口
  */
 public class $Proxy0 implements Foo {

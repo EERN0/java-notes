@@ -12,9 +12,16 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j(topic = "c.TestPool")
 class TestPool {
     public static void main(String[] args) {
-        MyThreadPool threadPool = new MyThreadPool(2, 2000, TimeUnit.MILLISECONDS, 3);
+        MyThreadPool threadPool = new MyThreadPool(1, 2000, TimeUnit.MILLISECONDS, 1,
+                (queue, task) -> {
+                    //queue.put(task);                                             // 1.主线程死等
+                    //queue.putWithTimeOut(task, 1500, TimeUnit.MILLISECONDS);     // 2.超时等待
+                    //log.debug("拒绝策略--放弃执行任务");                            // 3.放弃执行任务
+                    //throw new RuntimeException("拒绝策略--放弃执行任务，抛出异常");   // 4.放弃执行任务，并抛出异常
+                    task.run();     // 5.让调用者自己执行，在主线程里面直接task.run()，会让主线程来执行任务
+                });
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 3; i++) {
             int j = i;  // 变化的i不能用在lambda或多线程中，除非用原子类（raft统计选票可以改掉）
 
             threadPool.execute(new Runnable() {
@@ -33,6 +40,11 @@ class TestPool {
     }
 }
 
+// 任务拒绝策略
+@FunctionalInterface
+interface RejectPolicy<T> {
+    void reject(BlockingQueue<T> queue, T task);
+}
 
 @Slf4j(topic = "c.MyThreadPool")
 public class MyThreadPool {
@@ -50,11 +62,15 @@ public class MyThreadPool {
 
     private TimeUnit timeUnit;
 
-    public MyThreadPool(int coreSize, long timeout, TimeUnit timeUnit, int queueCapacity) {
+    // 任务拒绝策略
+    private RejectPolicy<Runnable> rejectPolicy;
+
+    public MyThreadPool(int coreSize, long timeout, TimeUnit timeUnit, int queueCapacity, RejectPolicy<Runnable> rejectPolicy) {
         this.coreSize = coreSize;
         this.timeout = timeout;
         this.timeUnit = timeUnit;
         this.taskQueue = new BlockingQueue<>(queueCapacity);
+        this.rejectPolicy = rejectPolicy;
     }
 
     // 线程池执行任务
@@ -69,7 +85,10 @@ public class MyThreadPool {
                 worker.start();
             } else {
                 // task加入任务队列
-                taskQueue.put(task);
+                //taskQueue.put(task);
+
+                // 若任务队列满了，新任务执行任务拒绝策略: 死等、带超时时间的等待、让调用者放弃任务、让调用者放弃任务并抛出异常、让调用者自己执行任务
+                taskQueue.tryPut(rejectPolicy, task);
             }
         }
     }
@@ -230,6 +249,24 @@ class BlockingQueue<T> {
             queue.addLast(task);
             emptyWaitSet.signal();
             return true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void tryPut(RejectPolicy<T> rejectPolicy, T task) {
+        lock.lock();
+        try {
+            // 任务数 小于 队列容量，有空闲
+            if (queue.size() < capcity) {
+                queue.addLast(task);
+                log.debug("加入任务队列 {}", task);
+                // 添加一个元素，唤醒消费者
+                emptyWaitSet.signal();
+            } else {
+                // 队列满，执行拒绝策略
+                rejectPolicy.reject(this, task);
+            }
         } finally {
             lock.unlock();
         }

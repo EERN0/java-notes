@@ -9,7 +9,7 @@ public class UnsafeDemo01 {
 
         while (true) {
             boolean flag = mr.isFlag();
-            // 加入读内存屏障: 会禁止读操作重排序，保证在这个屏障之前的所有读操作都已经完成，并且将缓存数据设为无效，重新从主存中进行加载
+            // 加入读内存屏障: 禁止读操作重排序，保证在这个屏障之前的所有读操作都已经完成，并且将缓存数据设为无效，重新从主存中进行加载
             unsafe.loadFence();
 
             if (flag) {
@@ -22,7 +22,7 @@ public class UnsafeDemo01 {
 }
 
 class MyRunnable implements Runnable {
-    /*volatile*/ boolean flag = false;
+    volatile boolean flag = false;
 
     @Override
     public void run() {

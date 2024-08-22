@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 public class A13 {
 
+    // 方法接口，约定好目标和代理需要重写的方法
     interface Foo {
         void foo();
 
@@ -23,6 +24,7 @@ public class A13 {
 
     /**
      * 目标类
+     * <p>
      * jdk的代理类、目标类要实现共同的接口
      */
     static class Target implements Foo {
@@ -39,7 +41,7 @@ public class A13 {
         }
     }
 
-    // 通过代理，调用目标方法
+    // 调用代理方法，实现对目标方法的增强
     public static void main(String[] args) {
         Foo proxy = new $Proxy0(new InvokeHandler() {
             @Override
