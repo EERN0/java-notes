@@ -26,7 +26,7 @@ public class DoubleMean {
             } else {
                 // 计算二倍均值法中的最大值
                 double maxMoney = money / (cnt - i) * 2;
-                // 生成随机数
+                // 生成随机数，Math.round取整，只保留2位小数
                 double random = Math.round(rand.nextDouble() * (maxMoney - 0.01) * 100.0) / 100.0 + 0.01;
                 redPackets.add(random);
                 money -= random;
@@ -36,7 +36,7 @@ public class DoubleMean {
     }
 
     public static void main(String[] args) {
-        List<Double> packets = generateRedPackets(10, 5);
+        List<Double> packets = generateRedPackets(100, 5);
         for (Double packet : packets) {
             System.out.println(packet);
         }
