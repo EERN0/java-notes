@@ -1,8 +1,7 @@
-import java.util.Comparator;
 import java.util.Objects;
 
 public class KangHashMap<K extends Comparable<K>, V> {
-    class Node<K extends Comparable<K>, V> {
+    static class Node<K extends Comparable<K>, V> {
         private K key;
         private V val;
 
@@ -11,12 +10,6 @@ public class KangHashMap<K extends Comparable<K>, V> {
         public Node(K key, V value) {
             this.key = key;
             this.val = value;
-        }
-
-        public Node(K key, V value, Node<K, V> next) {
-            this.key = key;
-            this.val = value;
-            this.next = next;
         }
     }
 
